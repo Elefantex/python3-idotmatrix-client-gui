@@ -999,19 +999,20 @@ class MainWindow(QWidget):
         self.process.start("cmd.exe", ["/c", "py app.py --scan"])
 
     def handle_ready_read(self):
-        data = self.process.readAll()
-        stdout = bytes(data).decode("utf8")
-        self.output_str += stdout
-        self.configuration_page.console_output.appendPlainText(stdout)
+    data = self.process.readAll()
+    # Decode with 'replace' to handle any decoding errors
+    stdout = bytes(data).decode("utf-8", errors="replace")
+    self.output_str += stdout
+    self.configuration_page.console_output.appendPlainText(stdout)
 
-        device_name_pattern = re.compile(r"found device ([\dA-F:]+) with name (\S+)")
-        matches = device_name_pattern.findall(stdout)
-        if matches:
-            self.configuration_page.device_list.clear()
-            for mac_address, device_name in matches:
-                item = QListWidgetItem(device_name)
-                self.configuration_page.device_list.addItem(item)
-                item.setToolTip(mac_address)
+    device_name_pattern = re.compile(r"found device ([\dA-F:]+) with name (\S+)")
+    matches = device_name_pattern.findall(stdout)
+    if matches:
+        self.configuration_page.device_list.clear()
+        for mac_address, device_name in matches:
+            item = QListWidgetItem(device_name)
+            self.configuration_page.device_list.addItem(item)
+            item.setToolTip(mac_address)
 
     def process_finished(self):
         pass
